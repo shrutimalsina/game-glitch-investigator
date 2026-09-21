@@ -76,11 +76,30 @@ Yes. Claude wrote the first versions of the scoring tests and explained why the 
 
 - How would you explain Streamlit "reruns" and session state to a friend who has never used Streamlit?
 
+Every time you click a button or type in a box, Streamlit runs your whole Python file again from the top. That means a normal variable is useless for anything you want to keep, because `secret = random.randint(1, 100)` would pick a new number on every click and you could never win. `st.session_state` solves this by storing values outside the script so they survive the reruns, and the `if "secret" not in st.session_state` guard makes sure the value is only set the first time.
+
+The lesson I took from it is that state bugs are easy to miss. My attempt counter started at 1 instead of 0, and because that line only runs once, my scoring function was correct and all my tests passed while the game still gave the wrong score.
+
 ---
 
 ## 5. Looking ahead: your developer habits
 
 - What is one habit or strategy from this project that you want to reuse in future labs or projects?
-  - This could be a testing habit, a prompting strategy, or a way you used Git.
+
+The habit I want to keep is fixing one thing at a time and checking it before moving on. I did not ask the AI to fix the whole game in one go. I played the game first and read through `app.py` until I could point at the two functions causing the problems. Then I moved `check_guess` on its own and fixed the hints, and played the game to see them come out right. Then I did `update_score` as a separate step, then the tests, then I ran `pytest`, then I opened the app again.
+
+Doing it in that order is what caught the bugs. Because I already knew the first fix worked, I knew that anything that broke afterwards came from the change I had just made.
+
 - What is one thing you would do differently next time you work with AI on a coding task?
+
+I would open the actual game much earlier instead of treating passing tests as the finish line. All of my tests were passing while the game was still giving the wrong score, because the real problem had moved into `app.py` where none of my tests were looking. Next time I will switch between testing and playing rather than doing all the testing first and the playing at the end.
+
+I would also question the AI sooner. A few times it told me something was done when really only part of it was done. Asking it to show me the output works much better than asking it whether something is fixed.
+
 - In one or two sentences, describe how this project changed the way you think about AI generated code.
+
+I used to read AI code and check whether it looked sensible, and this project showed me that looking sensible is exactly the problem, because the broken code was clean and easy to read and still completely wrong. Now I treat AI code as a first draft written by someone who never ran it, and I only believe it once I have seen it fail before the fix and pass after it.
+
+**A suggestion I rejected**
+
+At one point the AI suggested leaving `check_guess` as it was and changing the three starter tests to expect the backwards hints instead. That would have made everything pass while the game stayed broken. I said no, because tests are supposed to describe what the game should do, not be rewritten to agree with a bug. I fixed the messages inside the function instead, and then updated the tests to match.
